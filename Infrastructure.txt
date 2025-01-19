@@ -1,0 +1,10 @@
+Configure AWS .sh  
+
+The script will create these AWS resources:
+
+EC2 instance
+Key pair
+VPC, subnet, internet gateway, and route table
+Security group
+IAM role and instance profile
+Any associated resources like Elastic IPs (EIPs)
