@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mission-status:
+    build: ./mission_status_service
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mission_status_service:/app
+      - ./data:/app/data
+    logging:
+      driver: "awslogs"
+      options:
+        awslogs-group: "mission-control-logs"
+        awslogs-region: "us-east-1"
+        awslogs-stream: "mission-status"
+
+  alert-system:
+    build: ./alert_system
+    volumes:
+      - /var/log:/var/log:ro
+    logging:
+      driver: "awslogs"
+      options:
+        awslogs-group: "mission-control-logs"
+        awslogs-region: "us-east-1"
+        awslogs-stream: "alert-system"
+
+volumes:
+  data:
