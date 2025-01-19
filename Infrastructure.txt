@@ -8,3 +8,138 @@ VPC, subnet, internet gateway, and route table
 Security group
 IAM role and instance profile
 Any associated resources like Elastic IPs (EIPs)
+
+Step-by-Step Cleanup Commands
+
+Delete the EC2 Instance
+Identify the instance ID
+aws ec2 describe-instances --filters "Name=tag:Name,Values=mission-control-instance" --query "Reservations[*].Instances[*].InstanceId" --output text
+
+2. Terminate the instance:
+aws ec2 terminate-instances --instance-ids <INSTANCE_ID>
+
+3. Wait for the instance to terminate:
+aws ec2 wait instance-terminated --instance-ids <INSTANCE_ID>
+
+Delete the Key Pair
+
+1. Delete the key pair:
+aws ec2 delete-key-pair --key-name mission-control-key
+
+2. Remove the local .pem file:
+rm -f mission-control-key.pem
+
+Delete the Security Group
+
+1. Identify the security group ID
+aws ec2 describe-security-groups --filters "Name=group-name,Values=mission-control-sg" --query "SecurityGroups[*].GroupId" --output text
+
+2.Delete the security group:
+aws ec2 delete-security-group --group-id <SECURITY_GROUP_ID>
+
+Delete the Subnet
+1. Identify the subnet ID:
+aws ec2 describe-subnets --filters "Name=tag:Name,Values=mission-control-subnet" --query "Subnets[*].SubnetId" --output text
+
+2. Delete the subnet:
+aws ec2 delete-subnet --subnet-id <SUBNET_ID>
+
+Delete the Internet Gateway
+1. Identify the internet gateway ID:
+aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=<VPC_ID>" --query "InternetGateways[*].InternetGatewayId" --output text
+
+2. Detach the internet gateway
+aws ec2 detach-internet-gateway --internet-gateway-id <IGW_ID> --vpc-id <VPC_ID>
+
+3.Delete the internet gateway:
+aws ec2 delete-internet-gateway --internet-gateway-id <IGW_ID>
+
+Delete the Route Table
+
+1.Identify the route table ID
+aws ec2 describe-route-tables --filters "Name=vpc-id,Values=<VPC_ID>" --query "RouteTables[*].RouteTableId" --output text
+
+2. Delete the route table:
+aws ec2 delete-route-table --route-table-id <ROUTE_TABLE_ID>
+
+Delete the VPC
+1. Identify the VPC ID:
+aws ec2 describe-vpcs --filters "Name=tag:Name,Values=mission-control-vpc" --query "Vpcs[*].VpcId" --output text
+2. Delete the VPC:
+aws ec2 delete-vpc --vpc-id <VPC_ID>
+
+Delete the IAM Role and Instance Profile
+
+1.Remove the role from the instance profile:
+aws iam remove-role-from-instance-profile --instance-profile-name mission-control-instance-profile --role-name mission-control-role
+2.Delete the instance profile:
+aws iam delete-instance-profile --instance-profile-name mission-control-instance-profile
+3.Detach any policies from the role
+aws iam detach-role-policy --role-name mission-control-role --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+4.Delete the IAM role:
+aws iam delete-role --role-name mission-control-role
+
+Automated Cleanup Script
+#!/bin/bash
+
+# Variables
+KEY_NAME="mission-control-key"
+SECURITY_GROUP_NAME="mission-control-sg"
+VPC_NAME="mission-control-vpc"
+SUBNET_NAME="mission-control-subnet"
+IAM_ROLE_NAME="mission-control-role"
+IAM_INSTANCE_PROFILE="mission-control-instance-profile"
+
+# Terminate EC2 Instances
+INSTANCE_IDS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=mission-control-instance" --query "Reservations[*].Instances[*].InstanceId" --output text)
+if [ "$INSTANCE_IDS" != "" ]; then
+    aws ec2 terminate-instances --instance-ids $INSTANCE_IDS
+    aws ec2 wait instance-terminated --instance-ids $INSTANCE_IDS
+fi
+
+# Delete Key Pair
+aws ec2 delete-key-pair --key-name $KEY_NAME
+rm -f $KEY_NAME.pem
+
+# Delete Security Group
+SECURITY_GROUP_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=$SECURITY_GROUP_NAME" --query "SecurityGroups[*].GroupId" --output text)
+if [ "$SECURITY_GROUP_ID" != "" ]; then
+    aws ec2 delete-security-group --group-id $SECURITY_GROUP_ID
+fi
+
+# Delete Subnet
+SUBNET_ID=$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=$SUBNET_NAME" --query "Subnets[*].SubnetId" --output text)
+if [ "$SUBNET_ID" != "" ]; then
+    aws ec2 delete-subnet --subnet-id $SUBNET_ID
+fi
+
+# Delete Internet Gateway
+IGW_ID=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query "InternetGateways[*].InternetGatewayId" --output text)
+if [ "$IGW_ID" != "" ]; then
+    aws ec2 detach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID
+    aws ec2 delete-internet-gateway --internet-gateway-id $IGW_ID
+fi
+
+# Delete Route Table
+ROUTE_TABLE_ID=$(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query "RouteTables[*].RouteTableId" --output text)
+if [ "$ROUTE_TABLE_ID" != "" ]; then
+    aws ec2 delete-route-table --route-table-id $ROUTE_TABLE_ID
+fi
+
+# Delete VPC
+VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=$VPC_NAME" --query "Vpcs[*].VpcId" --output text)
+if [ "$VPC_ID" != "" ]; then
+    aws ec2 delete-vpc --vpc-id $VPC_ID
+fi
+
+# Delete IAM Role and Instance Profile
+aws iam remove-role-from-instance-profile --instance-profile-name $IAM_INSTANCE_PROFILE --role-name $IAM_ROLE_NAME
+aws iam delete-instance-profile --instance-profile-name $IAM_INSTANCE_PROFILE
+aws iam detach-role-policy --role-name $IAM_ROLE_NAME --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+aws iam delete-role --role-name $IAM_ROLE_NAME
+
+echo "All resources deleted!"
+
+
+
+
