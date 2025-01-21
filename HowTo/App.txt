@@ -1,0 +1,24 @@
+The Flask app is a mission status monitoring service that simulates and returns the current status of various systems on a hypothetical mission (e.g., a space mission).
+
+What the App Does:
+Endpoint:
+The app provides a single API endpoint at /status.
+When accessed (via a web browser or API client), it returns a JSON response containing:
+The overall mission status.
+The current status of key onboard systems.
+A fixed mission time.
+
+Expected JSON Output Example:
+When a user makes a GET request to http://127.0.0.1:5000/status, the app responds with JSON data like this:
+
+
+{
+    "overall_status": "Caution",
+    "system_statuses": {
+        "Life Support": "OK",
+        "Navigation": "Critical",
+        "Communication": "Warning",
+        "Propulsion": "OK"
+    },
+    "mission_time": "Day 42, Hour 15"
+}
