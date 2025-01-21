@@ -44,14 +44,12 @@ echo "Created and configured Route Table: $ROUTE_TABLE_ID"
 echo "Creating Security Group"
 SECURITY_GROUP_ID=$(aws ec2 create-security-group --group-name $SECURITY_GROUP_NAME --description "Mission Control Security Group" --vpc-id $VPC_ID --query 'GroupId' --output text)
 aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 22 --cidr 0.0.0.0/0
-aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --ip-permissions IpProtocol=tcp,FromPort=22,ToPort=22,PrefixListIds=[{PrefixListId=$EC2_INSTANCE_CONNECT_PREFIXLIST}]
 echo "Created Security Group: $SECURITY_GROUP_ID"
 
 echo "Creating IAM Role and Instance Profile"
 aws iam create-role --role-name $IAM_ROLE_NAME --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
 aws iam attach-role-policy --role-name $IAM_ROLE_NAME --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
 
-# Check if instance profile exists, create if it doesn't
 if ! aws iam get-instance-profile --instance-profile-name $IAM_INSTANCE_PROFILE &> /dev/null; then
     aws iam create-instance-profile --instance-profile-name $IAM_INSTANCE_PROFILE
     echo "Created Instance Profile: $IAM_INSTANCE_PROFILE"
@@ -59,7 +57,6 @@ else
     echo "Instance Profile $IAM_INSTANCE_PROFILE already exists"
 fi
 
-# Add role to instance profile if not already added
 if ! aws iam get-instance-profile --instance-profile-name $IAM_INSTANCE_PROFILE | grep -q "$IAM_ROLE_NAME"; then
     aws iam add-role-to-instance-profile --role-name $IAM_ROLE_NAME --instance-profile-name $IAM_INSTANCE_PROFILE
     echo "Added Role to Instance Profile"
@@ -78,15 +75,16 @@ INSTANCE_ID=$(aws ec2 run-instances \
     --associate-public-ip-address \
     --iam-instance-profile Name=$IAM_INSTANCE_PROFILE \
     --user-data '#!/bin/bash
-                 sudo yum update -y
-                 sudo amazon-linux-extras enable docker
-                 sudo yum install -y docker
+                 cloud-init status --wait
+                 sudo dnf update -y
+                 sudo dnf install -y docker
                  sudo systemctl start docker
                  sudo systemctl enable docker
-                 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)" -o /usr/local/bin/docker-compose
                  sudo chmod +x /usr/local/bin/docker-compose
                  sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-                 usermod -a -G docker ec2-user' \
+                 sudo usermod -a -G docker ec2-user
+                 reboot' \
     --query 'Instances[0].InstanceId' \
     --output text)
 echo "Launched EC2 Instance: $INSTANCE_ID"
@@ -94,9 +92,6 @@ echo "Launched EC2 Instance: $INSTANCE_ID"
 echo "Waiting for Instance to be running"
 aws ec2 wait instance-running --instance-ids $INSTANCE_ID
 echo "Instance is now running"
-
-echo "Enabling DNS hostnames for VPC"
-aws ec2 modify-vpc-attribute --vpc-id $VPC_ID --enable-dns-hostnames "{\"Value\":true}"
 
 echo "Getting Instance details"
 PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
