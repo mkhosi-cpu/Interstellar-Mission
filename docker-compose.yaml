@@ -2,7 +2,7 @@
 
 services:
   mission-status:
-    build: ./mission_status_service
+    build: ./Mission_Service_Status
     ports:
       - "5000:5000"
     volumes:
