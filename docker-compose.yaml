@@ -8,14 +8,23 @@ services:
     volumes:
       - ./Mission_Service_Status:/app
       - ./data:/app/data
-  
-
+    logging:
+      driver: "awslogs"
+      options:
+        awslogs-group: "mission-control-logs"
+        awslogs-region: "us-east-1"
+        awslogs-stream: "mission-status"
 
   alert-system:
     build: ./alert_system
     volumes:
       - /var/log:/var/log:ro
- 
+    logging:
+      driver: "awslogs"
+      options:
+        awslogs-group: "mission-control-logs"
+        awslogs-region: "us-east-1"
+        awslogs-stream: "alert-system"
 
 volumes:
   data:
