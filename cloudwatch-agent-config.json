@@ -1,0 +1,30 @@
+{
+    "logs": {
+        "logs_collected": {
+            "files": {
+                "collect_list": [
+                    {
+                        "file_path": "/var/log/mission-status.log",
+                        "log_group_name": "mission-control-logs",
+                        "log_stream_name": "mission-status"
+                    },
+                    {
+                        "file_path": "/var/log/alert-system.log",
+                        "log_group_name": "mission-control-logs",
+                        "log_stream_name": "alert-system"
+                    }
+                ]
+            }
+        }
+    },
+    "metrics": {
+        "metrics_collected": {
+            "docker": {
+                "metrics_collection_interval": 60,
+                "containers": [
+                    "*"
+                ]
+            }
+        }
+    }
+}

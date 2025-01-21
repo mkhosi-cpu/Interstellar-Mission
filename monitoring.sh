@@ -41,6 +41,12 @@ cat << EOF > cloudwatch-agent-config.json
     "metrics": {
         "metrics_collected": {
             "docker": {
+                "measurement": [
+                    "cpu_usage_total",
+                    "memory_usage",
+                    "network_rx_bytes",
+                    "network_tx_bytes"
+                ],
                 "metrics_collection_interval": 60,
                 "containers": [
                     "*"
@@ -51,6 +57,7 @@ cat << EOF > cloudwatch-agent-config.json
 }
 EOF
 check_status "Creating CloudWatch agent configuration file locally"
+
 
 # Ensure SSH access is configured and the private key is used
 INSTANCE_PUBLIC_IP=$(aws ec2 describe-instances \
