@@ -4,7 +4,7 @@
 KEY_NAME="mission-control-key"
 SECURITY_GROUP_NAME="mission-control-sg"
 INSTANCE_TYPE="t2.micro"
-AMI_ID="ami-05576a079321f21f8"
+AMI_ID="ami-0df8c184d5f6ae949"
 REGION="us-east-1"
 VPC_NAME="mission-control-vpc"
 SUBNET_NAME="mission-control-subnet"
@@ -78,8 +78,8 @@ INSTANCE_ID=$(aws ec2 run-instances \
     --associate-public-ip-address \
     --iam-instance-profile Name=$IAM_INSTANCE_PROFILE \
     --user-data '#!/bin/bash
-                 yum update -y
-                 yum install docker -y
+                 sudo yum update -y
+                 sudo yum install docker -y
                  systemctl enable start
                  systemctl start docker
                  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
