@@ -21,4 +21,14 @@ When a user makes a GET request to http://127.0.0.1:5000/status, the app respond
         "Propulsion": "OK"
     },
     "mission_time": "Day 42, Hour 15"
+
 }
+
+
+
+Potential Use Cases:
+This app could be used for:
+
+Simulating mission control systems (for training or testing purposes).
+Developing a dashboard to visualize system health.
+Creating a monitoring API for a spacecraft, ship, or remote facility.
