@@ -6,7 +6,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./mission_status_service:/app
+      - ./Mission_Service_Status:/app
       - ./data:/app/data
     logging:
       driver: "awslogs"
