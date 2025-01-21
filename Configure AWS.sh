@@ -79,9 +79,10 @@ INSTANCE_ID=$(aws ec2 run-instances \
     --iam-instance-profile Name=$IAM_INSTANCE_PROFILE \
     --user-data '#!/bin/bash
                  sudo yum update -y
-                 sudo yum install docker -y
-                 systemctl enable start
-                 systemctl start docker
+                 sudo amazon-linux-extras enable docker
+                 sudo yum install -y docker
+                 sudo systemctl start docker
+                 sudo systemctl enable docker
                  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
                  sudo chmod +x /usr/local/bin/docker-compose
                  sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
