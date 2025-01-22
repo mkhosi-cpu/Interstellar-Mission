@@ -44,6 +44,7 @@ echo "Created and configured Route Table: $ROUTE_TABLE_ID"
 echo "Creating Security Group"
 SECURITY_GROUP_ID=$(aws ec2 create-security-group --group-name $SECURITY_GROUP_NAME --description "Mission Control Security Group" --vpc-id $VPC_ID --query 'GroupId' --output text)
 aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 5000 --cidr 0.0.0.0/0
 echo "Created Security Group: $SECURITY_GROUP_ID"
 
 echo "Creating IAM Role and Instance Profile"
