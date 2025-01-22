@@ -49,6 +49,8 @@ echo "Created Security Group: $SECURITY_GROUP_ID"
 echo "Creating IAM Role and Instance Profile"
 aws iam create-role --role-name $IAM_ROLE_NAME --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
 aws iam attach-role-policy --role-name $IAM_ROLE_NAME --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+aws iam attach-role-policy --role-name $IAM_ROLE_NAME --policy-arn arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+
 
 if ! aws iam get-instance-profile --instance-profile-name $IAM_INSTANCE_PROFILE &> /dev/null; then
     aws iam create-instance-profile --instance-profile-name $IAM_INSTANCE_PROFILE
