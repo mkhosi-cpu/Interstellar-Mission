@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Replace these variables with your EC2 instance details
-EC2_INSTANCE_ID="i-039d4af92a0ffdd1f"
+EC2_INSTANCE_ID="i-06761214ddfc7ae48"
 EC2_REGION="us-east-1"
 EC2_USER="ec2-user"
 PRIVATE_KEY_PATH="./mission-control-key.pem"
