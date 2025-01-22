@@ -75,7 +75,7 @@ if [ "$INSTANCE_PUBLIC_IP" == "None" ]; then
 fi
 
 # Copy the configuration file and docker-compose.yml to the EC2 instance
-scp -i $PRIVATE_KEY_PATH cloudwatch-agent-config.json docker-compose.yaml $EC2_USER@$INSTANCE_PUBLIC_IP:$PROJECT_DIR/
+scp -r -i $PRIVATE_KEY_PATH cloudwatch-agent-config.json docker-compose.yaml Mission_Service_Status alert_system $EC2_USER@$INSTANCE_PUBLIC_IP:$PROJECT_DIR/
 check_status "Copying configuration files to EC2 instance"
 
 # Run commands on the EC2 instance via SSH

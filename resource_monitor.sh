@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOPIC_ARN="arn:aws:sns:us-east-1:123456789012:mission-control-alerts"
+TOPIC_ARN="arn:aws:sns:us-east-1:724772067672:mission-control-alerts"
 
 while true; do
     cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
